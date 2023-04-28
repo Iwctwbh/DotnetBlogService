@@ -1,0 +1,12 @@
+﻿# Folder
+/bin
+/obj
+/.idea
+/.git
+/.vs
+# /appsettings.json
+# /appsettings.Development.json
+
+
+# File
+*.user
