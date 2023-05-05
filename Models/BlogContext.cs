@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotnetBlogService.Models;
 
@@ -13,30 +15,17 @@ public partial class BlogContext : DbContext
     {
     }
 
-    public virtual DbSet<Tblpost> Tblposts { get; set; }
+    public virtual DbSet<TblPost> TblPosts { get; set; }
 
-    public virtual DbSet<TblpostsHistory> TblpostsHistories { get; set; }
+    public virtual DbSet<TblPostsHistory> TblPostsHistories { get; set; }
 
-    public virtual DbSet<Tbltag> Tbltags { get; set; }
+    public virtual DbSet<TblTag> TblTags { get; set; }
 
-    public virtual DbSet<TbltagsHistory> TbltagsHistories { get; set; }
-
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //    => optionsBuilder.UseMySql("server=;user id=;password=;database=", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.5-mariadb"));
+    public virtual DbSet<TblTagsHistory> TblTagsHistories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // 根据环境变量合并配置文件
-        var configurationRoot = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", true, true)
-            .AddEnvironmentVariables()
-            .Build();
-
-        var config = new ConfigurationModel(configurationRoot);
-
-        optionsBuilder.UseMySql(config.GetConfig("ConnectionStrings:DefaultConnection"),
-            ServerVersion.Parse("10.6.5-mariadb"));
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseMySql("server=127.0.0.1;user id=dataBaseBlogUser;password=7cabe269b3534347b56ee53346b634c8;database=Blog", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.5-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,11 +33,11 @@ public partial class BlogContext : DbContext
             .UseCollation("utf8mb4_general_ci")
             .HasCharSet("utf8mb4");
 
-        modelBuilder.Entity<Tblpost>(entity =>
+        modelBuilder.Entity<TblPost>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("tblposts");
+            entity.ToTable("tblPosts");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.CreatedDate).HasMaxLength(6);
@@ -57,11 +46,11 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.Title).HasMaxLength(100);
         });
 
-        modelBuilder.Entity<TblpostsHistory>(entity =>
+        modelBuilder.Entity<TblPostsHistory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("tblposts_history");
+            entity.ToTable("tblPosts_History");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Action).HasMaxLength(10);
@@ -72,11 +61,11 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.Title).HasMaxLength(100);
         });
 
-        modelBuilder.Entity<Tbltag>(entity =>
+        modelBuilder.Entity<TblTag>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("tbltags");
+            entity.ToTable("tblTags");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.DateCreated).HasColumnType("datetime");
@@ -85,11 +74,11 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(50);
         });
 
-        modelBuilder.Entity<TbltagsHistory>(entity =>
+        modelBuilder.Entity<TblTagsHistory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("tbltags_history");
+            entity.ToTable("tblTags_History");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
             entity.Property(e => e.Action).HasMaxLength(10);

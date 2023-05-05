@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DotnetBlogService.Models;
 
-public partial class TbltagsHistory
+public partial class TblTagsHistory
 {
     public int Id { get; set; }
 

@@ -53,7 +53,7 @@ app.MapGet("/weatherforecast", () =>
 app.MapGet("/AddPost", (string argTitle, string argContent) =>
     {
         using var db = new BlogContext();
-        var post = new Tblpost
+        var post = new TblPost
         {
             Title = argTitle,
             Content = argContent,
@@ -61,7 +61,7 @@ app.MapGet("/AddPost", (string argTitle, string argContent) =>
             ModifiedDate = DateTime.Now,
             IsActive = 1
         };
-        db.Tblposts.Add(post);
+        db.TblPosts.Add(post);
         db.SaveChanges(); // 提交更改后才能保存到数据库。
     })
     .WithName("AddPost")
