@@ -1,11 +1,12 @@
 ﻿# Folder
-/bin
-/obj
-/.idea
-/.git
-/.vs
-/appsettings.json
-/appsettings.Development.json
+bin
+obj
+.git
+.vs
+.idea
+
+# /appsettings.json
+# /appsettings.Development.json
 
 
 # File

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DotnetBlogService.Models;
+namespace DotnetBlogService_EFCore.Models;
 
 public partial class TblPost
 {
@@ -11,9 +11,9 @@ public partial class TblPost
 
     public string Content { get; set; } = null!;
 
-    public DateTime CreatedDate { get; set; }
+    public DateTime DateCreated { get; set; }
 
-    public DateTime ModifiedDate { get; set; }
+    public DateTime DateModified { get; set; }
 
     public ulong IsActive { get; set; }
 }

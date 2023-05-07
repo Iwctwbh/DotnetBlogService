@@ -1,4 +1,4 @@
-using DotnetBlogService.Models;
+using DotnetBlogService_EFCore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,8 +57,8 @@ app.MapGet("/AddPost", (string argTitle, string argContent) =>
         {
             Title = argTitle,
             Content = argContent,
-            CreatedDate = DateTime.Now,
-            ModifiedDate = DateTime.Now,
+            DateCreated = DateTime.Now,
+            DateModified = DateTime.Now,
             IsActive = 1
         };
         db.TblPosts.Add(post);

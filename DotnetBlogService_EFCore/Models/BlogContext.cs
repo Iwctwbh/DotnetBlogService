@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DotnetBlogService.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotnetBlogService.Models;
+namespace DotnetBlogService_EFCore.Models;
 
 public partial class BlogContext : DbContext
 {
@@ -24,8 +23,17 @@ public partial class BlogContext : DbContext
     public virtual DbSet<TblTagsHistory> TblTagsHistories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=127.0.0.1;user id=dataBaseBlogUser;password=7cabe269b3534347b56ee53346b634c8;database=Blog", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.5-mariadb"));
+    {
+        // 根据环境变量合并配置文件
+        var configurationRoot = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", true, true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var config = new ConfigurationModel(configurationRoot);
+        optionsBuilder.UseMySql(config.GetConfig("ConnectionStrings:DefaultConnection"),
+            ServerVersion.Parse("10.6.5-mariadb"));
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,9 +48,9 @@ public partial class BlogContext : DbContext
             entity.ToTable("tblPosts");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
-            entity.Property(e => e.CreatedDate).HasMaxLength(6);
+            entity.Property(e => e.DateCreated).HasMaxLength(6);
+            entity.Property(e => e.DateModified).HasMaxLength(6);
             entity.Property(e => e.IsActive).HasColumnType("bit(1)");
-            entity.Property(e => e.ModifiedDate).HasMaxLength(6);
             entity.Property(e => e.Title).HasMaxLength(100);
         });
 

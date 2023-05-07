@@ -1,3 +1,6 @@
+-- 创建库
+CREATE DATABASE Blog CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
+
 -- 创建表
 CREATE TABLE `tblTags` (
   `Id` int NOT NULL AUTO_INCREMENT,
@@ -23,20 +26,20 @@ CREATE TABLE `tblTags_History` (
 -- 添加触发器
 CREATE TRIGGER `tblTags_Insert` AFTER INSERT ON `tblTags` FOR EACH ROW 
 BEGIN
-    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`,`Action`)
-    VALUES (NEW.Id, NEW.Name, NEW.DateCreated, NEW.DateModified, NEW.IsActive,'Insert');
+    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
+    VALUES (NEW.Id, NEW.Name, NEW.DateCreated, NEW.DateModified, NEW.IsActive, 'Insert');
 END
 
 CREATE TRIGGER `tblTags_Update` AFTER UPDATE ON `tblTags` FOR EACH ROW 
 BEGIN
-    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`,`Action`)
-    VALUES (OLD.Id, OLD.Name, OLD.DateCreated, OLD.DateModified, OLD.IsActive,'Update');
+    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
+    VALUES (OLD.Id, OLD.Name, OLD.DateCreated, OLD.DateModified, OLD.IsActive, 'Update');
 END
 
 CREATE TRIGGER `tblTags_Delete` AFTER DELETE ON `tblTags` FOR EACH ROW 
 BEGIN
-    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`,`Action`)
-    VALUES (OLD.Id, OLD.Name, OLD.DateCreated, OLD.DateModified, OLD.IsActive,'Delete');
+    INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
+    VALUES (OLD.Id, OLD.Name, OLD.DateCreated, OLD.DateModified, OLD.IsActive, 'Delete');
 END
 
 
@@ -46,8 +49,8 @@ CREATE TABLE `tblPosts` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Title` varchar(100) NOT NULL,
   `Content` longtext NOT NULL,
-  `CreatedDate` datetime(6) NOT NULL,
-  `ModifiedDate` datetime(6) NOT NULL,
+  `DateCreated` datetime(6) NOT NULL,
+  `DateModified` datetime(6) NOT NULL,
   `IsActive` BIT NOT NULL,
   PRIMARY KEY (`Id`)
 );
@@ -69,21 +72,36 @@ CREATE TABLE `tblPosts_History` (
 CREATE TRIGGER `tblPosts_Insert` AFTER INSERT ON `tblPosts` FOR EACH ROW 
 BEGIN
     INSERT INTO `tblPosts_History`(`PostId`, `Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
-    VALUES (NEW.Id, NEW.Title, NEW.Content, NEW.CreatedDate, NEW.ModifiedDate, NEW.IsActive,'Insert');
+    VALUES (NEW.Id, NEW.Title, NEW.Content, NEW.DateCreated, NEW.DateModified, NEW.IsActive, 'Insert');
 END
 
 CREATE TRIGGER `tblPosts_Update` AFTER UPDATE ON `tblPosts` FOR EACH ROW 
 BEGIN
     INSERT INTO `tblPosts_History`(`PostId`, `Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`,`Action`)
-    VALUES (OLD.Id, OLD.Title, OLD.Content, OLD.CreatedDate, OLD.ModifiedDate, OLD.IsActive,'Update');
+    VALUES (OLD.Id, OLD.Title, OLD.Content, OLD.DateCreated, OLD.DateModified, OLD.IsActive, 'Update');
 END
 
 CREATE TRIGGER `tblPosts_Delete` AFTER DELETE ON `tblPosts` FOR EACH ROW 
 BEGIN
     INSERT INTO `tblPosts_History`(`PostId`, `Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`,`Action`)
-    VALUES (OLD.Id, OLD.Title, OLD.Content, OLD.CreatedDate, OLD.ModifiedDate, OLD.IsActive,'Delete');
+    VALUES (OLD.Id, OLD.Title, OLD.Content, OLD.DateCreated, OLD.DateModified, OLD.IsActive, 'Delete');
 END
 
 SHOW TRIGGERS FROM Blog;
 
-SHOW TRIGGERS;
+-- 存储过程SP
+CREATE PROCEDURE sp_AddPost(IN Title varchar(100), IN Content LONGTEXT, IN IsActive bit(1))
+BEGIN
+	INSERT INTO `tblPosts`(`Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`)
+    VALUES (Title, Content, Now(), Now(), IsActive);
+END
+
+CREATE PROCEDURE sp_UpdatePost(IN Id int, IN Title varchar(100), IN Content LONGTEXT, IN IsActive bit(1))
+BEGIN
+	UPDATE `tblPosts`
+	SET `Title` = Title,
+		`Content` = Content,
+		`DateModified` = Now(),
+		`IsActive` = IsActive
+    WHERE Id = ID;
+END

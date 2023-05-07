@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DotnetBlogService.Models;
+namespace DotnetBlogService_EFCore.Models;
 
-public partial class TblPostsHistory
+public partial class TblTagsHistory
 {
     public int Id { get; set; }
 
-    public int PostId { get; set; }
+    public int TagId { get; set; }
 
-    public string Title { get; set; } = null!;
-
-    public string Content { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
     public DateTime DateCreated { get; set; }
 
