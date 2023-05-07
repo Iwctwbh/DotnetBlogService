@@ -5,8 +5,8 @@ obj
 .vs
 .idea
 
-# /appsettings.json
-# /appsettings.Development.json
+appsettings.json
+appsettings.Development.json
 
 
 # File
