@@ -16,39 +16,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-// 根据环境变量合并配置文件
-//var configurationRoot = new ConfigurationBuilder()
-//    .AddJsonFile("appsettings.json", true, true)
-//    .AddEnvironmentVariables()
-//    .Build();
-
-//var config = new ConfigurationModel(configurationRoot);
-//// 配置MySQL数据库及连接池
-//builder.Services.AddDbContextPool<BlogContext>(option =>
-//    option.UseMySql(config.GetConfig("ConnectionStrings:DefaultConnection"), ServerVersion.Parse("8.0.26-mysql")));
-
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast")
-    .WithOpenApi();
 
 app.MapGet("/AddPost", (string argTitle, string argContent) =>
     {
