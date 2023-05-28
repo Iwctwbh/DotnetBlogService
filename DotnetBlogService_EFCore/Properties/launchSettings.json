@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "DotnetBlogService_EFCore": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:1635;http://localhost:1636"
+    }
+  }
+}

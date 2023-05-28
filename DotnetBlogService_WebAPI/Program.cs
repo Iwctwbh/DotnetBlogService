@@ -1,4 +1,6 @@
 using DotnetBlogService_EFCore.Models;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +32,31 @@ app.MapGet("/AddPost", (string argTitle, string argContent) =>
             IsActive = 1
         };
         db.TblPosts.Add(post);
-        db.SaveChanges(); // Ìá½»¸ü¸Äºó²ÅÄÜ±£´æµ½Êý¾Ý¿â¡£
+        db.SaveChanges(); // æäº¤æ›´æ”¹åŽæ‰èƒ½ä¿å­˜åˆ°æ•°æ®åº“ã€‚
+
+        //var param1 = new SqlParameter("@param1", "value1");
+        //var param2 = new SqlParameter("@param2", "value2");
+
+        //var result = BlogContext.FromSqlRaw("EXECUTE MyStoredProc @param1, @param2", param1, param2).ToList();
+
+        using var context = new BlogContext();
+        var parameter0 = new MySqlParameter("@inputParam", "someValue");
+        var parameter1 = new MySqlParameter("@inputParam", "someValue");
+        var parameter2 = new MySqlParameter("@inputParam", "someValue");
+
+        var result = context.TblPosts.FromSqlRaw("CALL sp_AddPost({0}, {1}, {2})", parameter0, parameter1, parameter2)
+            .ToList();
     })
     .WithName("AddPost")
+    .WithOpenApi();
+
+app.MapGet("/GetPosts", (int argTake, int argSkip) =>
+    {
+        var sqlResult = new BlogContext().TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(argSkip)
+            .Take(argTake).ToList();
+        return sqlResult;
+    })
+    .WithName("GetPosts")
     .WithOpenApi();
 
 app.Run();
