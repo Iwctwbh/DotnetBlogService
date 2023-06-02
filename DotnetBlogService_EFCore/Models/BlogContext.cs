@@ -18,6 +18,8 @@ public partial class BlogContext : DbContext
 
     public virtual DbSet<TblPostsHistory> TblPostsHistories { get; set; }
 
+    public virtual DbSet<TblPostsTagsMapping> TblPostsTagsMappings { get; set; }
+
     public virtual DbSet<TblTag> TblTags { get; set; }
 
     public virtual DbSet<TblTagsHistory> TblTagsHistories { get; set; }
@@ -31,6 +33,7 @@ public partial class BlogContext : DbContext
             .Build();
 
         var config = new ConfigurationModel(configurationRoot);
+
         optionsBuilder.UseMySql(config.GetConfig("ConnectionStrings:DefaultConnection"),
             ServerVersion.Parse("10.6.5-mariadb"));
     }
@@ -67,6 +70,29 @@ public partial class BlogContext : DbContext
             entity.Property(e => e.IsActive).HasColumnType("bit(1)");
             entity.Property(e => e.PostId).HasColumnType("int(11)");
             entity.Property(e => e.Title).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<TblPostsTagsMapping>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("tblPostsTagsMapping");
+
+            entity.HasIndex(e => e.PostId, "PostId");
+
+            entity.HasIndex(e => e.TagId, "TagId");
+
+            entity.Property(e => e.IsActive).HasColumnType("bit(1)");
+            entity.Property(e => e.PostId).HasColumnType("int(11)");
+            entity.Property(e => e.TagId).HasColumnType("int(11)");
+
+            entity.HasOne(d => d.Post).WithMany()
+                .HasForeignKey(d => d.PostId)
+                .HasConstraintName("tblpoststagsmapping_ibfk_1");
+
+            entity.HasOne(d => d.Tag).WithMany()
+                .HasForeignKey(d => d.TagId)
+                .HasConstraintName("tblpoststagsmapping_ibfk_2");
         });
 
         modelBuilder.Entity<TblTag>(entity =>

@@ -1,7 +1,7 @@
 -- 创建库
 CREATE DATABASE Blog CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;
 
--- 创建表
+-- 创建tblTags表
 CREATE TABLE `tblTags` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Name` varchar(50) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE `tblTags` (
   PRIMARY KEY (`Id`)
 )
 
--- 生成历史表
+-- 创建tblTags_History历史表
 CREATE TABLE `tblTags_History` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `TagId` int NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `tblTags_History` (
   PRIMARY KEY (`Id`)
 )
 
--- 添加触发器
+-- 添加tblTags => tblTags_History触发器
 CREATE TRIGGER `tblTags_Insert` AFTER INSERT ON `tblTags` FOR EACH ROW 
 BEGIN
     INSERT INTO `tblTags_History`(`TagId`, `Name`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
@@ -44,7 +44,7 @@ END
 
 
 
--- 创建表
+-- 创建tblPosts表
 CREATE TABLE `tblPosts` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `Title` varchar(100) NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE `tblPosts` (
   PRIMARY KEY (`Id`)
 );
 
--- 生成历史表
+-- 创建tblPosts_History历史表
 CREATE TABLE `tblPosts_History` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `PostId` int NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE `tblPosts_History` (
   PRIMARY KEY (`Id`)
 );
 
--- 添加触发器
+-- 添加tblPosts -> tblPosts_History触发器
 CREATE TRIGGER `tblPosts_Insert` AFTER INSERT ON `tblPosts` FOR EACH ROW 
 BEGIN
     INSERT INTO `tblPosts_History`(`PostId`, `Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`, `Action`)
@@ -106,6 +106,26 @@ BEGIN
     WHERE Id = ID;
 END
 
+-- ALTER TABLE tblPosts ENGINE=InnoDB;
+-- ALTER TABLE tblPosts_History ENGINE=InnoDB;
+-- ALTER TABLE tblTags ENGINE=InnoDB;
+-- ALTER TABLE tblTags_History ENGINE=InnoDB;
+
+-- 创建关系表
+CREATE TABLE `tblPostsTagsMapping` (
+	`PostId` int NOT NULL,
+	`TagId` int NOT NULL,
+	`IsActive` BIT NOT NULL,
+	FOREIGN KEY(`PostId`) REFERENCES `tblPosts` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY(`TagId`) REFERENCES `tblTags` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CALL sp_AddPost('1','2',1)
 
 SELECT * FROM tblPosts tp 
+
+SELECT * FROM tblPostsTagsMapping
+
+SELECT * FROM tblTags
+
+INSERT INTO `tblTags` (`Name`, `DateCreated`, `DateModified`, `IsActive`) VALUES ('C/C++', NOW(), NOW(), 1)
