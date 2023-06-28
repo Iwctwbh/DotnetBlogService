@@ -120,12 +120,7 @@ CREATE TABLE `tblPostsTagsMapping` (
 	FOREIGN KEY(`TagId`) REFERENCES `tblTags` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CALL sp_AddPost('1','2',1)
-
-SELECT * FROM tblPosts tp 
-
-SELECT * FROM tblPostsTagsMapping
-
-SELECT * FROM tblTags
-
-INSERT INTO `tblTags` (`Name`, `DateCreated`, `DateModified`, `IsActive`) VALUES ('C/C++', NOW(), NOW(), 1)
+-- 生成通用结果表
+CREATE TABLE `tblResultGerenal` (
+  `ErrorCode` int NOT NULL
+);

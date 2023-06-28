@@ -21,13 +21,11 @@ public partial class BlogContext : DbContext
 
     public virtual DbSet<TblPostsTagsMapping> TblPostsTagsMappings { get; set; }
 
+    public virtual DbSet<TblResultGeneral> TblResultGenerals { get; set; }
+
     public virtual DbSet<TblTag> TblTags { get; set; }
 
     public virtual DbSet<TblTagsHistory> TblTagsHistories { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySql("server=10.11.12.6;user id=dataBaseBlogUser;password=9AC7CCE473CF9ECF4A1466C72DE94178;database=Blog", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.5-mariadb"));
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,11 +77,20 @@ public partial class BlogContext : DbContext
 
             entity.HasOne(d => d.Post).WithMany()
                 .HasForeignKey(d => d.PostId)
-                .HasConstraintName("tblpoststagsmapping_ibfk_1");
+                .HasConstraintName("tblPostsTagsMapping_ibfk_1");
 
             entity.HasOne(d => d.Tag).WithMany()
                 .HasForeignKey(d => d.TagId)
-                .HasConstraintName("tblpoststagsmapping_ibfk_2");
+                .HasConstraintName("tblPostsTagsMapping_ibfk_2");
+        });
+
+        modelBuilder.Entity<TblResultGeneral>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("tblResultGeneral");
+
+            entity.Property(e => e.ErrorCode).HasColumnType("int(11)");
         });
 
         modelBuilder.Entity<TblTag>(entity =>
