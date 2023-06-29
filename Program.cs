@@ -66,6 +66,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+const int maxMessageSize = 80 * 1024;
+
 app.MapPost("/AddPost", async (HttpRequest req, Stream argBody, BlogContext db) =>
 {
     //var post = new TblPost
@@ -79,17 +81,37 @@ app.MapPost("/AddPost", async (HttpRequest req, Stream argBody, BlogContext db) 
     //db.TblPosts.Add(post);
     //db.SaveChanges(); // 提交更改后才能保存到数据库。
 
-    var parameter0 = new MySqlParameter("@inputParam", "someValue");
-    var parameter1 = new MySqlParameter("@inputParam", "someValue");
-    var parameter2 = new MySqlParameter("@inputParam", "someValue");
+    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
 
-    var result = db.Database.ExecuteSql($"CALL sp_AddPost({parameter0}, {parameter1}, {parameter2})");
+    var readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
+
+    var buffer = new byte[readSize];
+
+    var read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
+    if (read > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
+    var bufferString = Encoding.Default.GetString(buffer);
+
+    bufferString = System.Text.RegularExpressions.Regex.Unescape(bufferString);
+    bufferString = bufferString.Trim('"');
+
+    var jsonBody = new JObject();
+    try
+    {
+        jsonBody = JObject.Parse(bufferString);
+    }
+    catch (Exception e)
+    {
+        // ignored
+    }
+
+    string? title = jsonBody.Property("title")?.Value.ToString();
+    string? content = jsonBody.Property("content")?.Value.ToString();
+
+    var result = await db.TblResultGenerals.FromSql($@"CALL sp_AddPost ({title}, {content}, 1)").ToListAsync();
+    return result;
 })
     .WithName("AddPost")
     .WithOpenApi();
-
-var maxMessageSize = 80 * 1024;
-
 
 app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db) =>
 {
@@ -121,35 +143,7 @@ app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db)
     int.TryParse(jsonBody.Property("skip")?.Value.ToString(), out var skip);
     skip = Math.Max(0, skip);
 
-    var a = await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(skip).Take(10).ToListAsync();
-    var b = JsonSerializer.Serialize(a);
-    return a;
+    return await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(skip).Take(10).ToListAsync();
 });
-
-//app.MapPost("/register", async (HttpRequest req, Stream body,
-//    Channel<ReadOnlyMemory<byte>> queue) =>
-//{
-//    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return Results.BadRequest();
-
-//    // We're not above the message size and we have a content length, or
-//    // we're a chunked request and we're going to read up to the maxMessageSize + 1. 
-//    // We add one to the message size so that we can detect when a chunked request body
-//    // is bigger than our configured max.
-//    var readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
-
-//    var buffer = new byte[readSize];
-
-//    // Read at least that many bytes from the body.
-//    var read = await body.ReadAtLeastAsync(buffer, readSize, false);
-//    var ssss = Encoding.Default.GetString(buffer);
-//    // We read more than the max, so this is a bad request.
-//    if (read > maxMessageSize) return Results.BadRequest();
-
-//    // Attempt to send the buffer to the background queue.
-//    if (queue.Writer.TryWrite(buffer.AsMemory(..read))) return Results.Accepted();
-
-//    // We couldn't accept the message since we're overloaded.
-//    return Results.StatusCode(StatusCodes.Status429TooManyRequests);
-//});
 
 app.Run();

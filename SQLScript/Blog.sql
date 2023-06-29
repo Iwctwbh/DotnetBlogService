@@ -92,8 +92,22 @@ SHOW TRIGGERS FROM Blog;
 -- 存储过程SP
 CREATE PROCEDURE sp_AddPost(IN Title varchar(100), IN Content LONGTEXT, IN IsActive bit(1))
 BEGIN
+	DECLARE ErrorCode int DEFAULT 0;
+	DECLARE ErrorDesc varchar(50) DEFAULT NULL;
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION SET ErrorCode = -1;
+
+	START TRANSACTION;
+
 	INSERT INTO `tblPosts`(`Title`, `Content`, `DateCreated`, `DateModified`, `IsActive`)
-    VALUES (Title, Content, Now(), Now(), IsActive);
+    VALUES (Title, Content, NOW(3), NOW(3), IsActive);
+
+	IF ErrorCode = -1 THEN
+		ROLLBACK;
+	ELSE
+		COMMIT;
+	END IF;
+	
+ 	SELECT ErrorCode, ErrorDesc;
 END
 
 CREATE PROCEDURE sp_UpdatePost(IN Id int, IN Title varchar(100), IN Content LONGTEXT, IN IsActive bit(1))
@@ -101,7 +115,7 @@ BEGIN
 	UPDATE `tblPosts`
 	SET `Title` = Title,
 		`Content` = Content,
-		`DateModified` = Now(),
+		`DateModified` = NOW(3),
 		`IsActive` = IsActive
     WHERE Id = ID;
 END
@@ -121,6 +135,7 @@ CREATE TABLE `tblPostsTagsMapping` (
 );
 
 -- 生成通用结果表
-CREATE TABLE `tblResultGerenal` (
-  `ErrorCode` int NOT NULL
+CREATE TABLE `tblResultGeneral` (
+  `ErrorCode` int NOT NULL,
+  `ErrorDesc` varchar(50)
 );

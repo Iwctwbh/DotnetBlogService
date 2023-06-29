@@ -91,6 +91,7 @@ public partial class BlogContext : DbContext
                 .ToTable("tblResultGeneral");
 
             entity.Property(e => e.ErrorCode).HasColumnType("int(11)");
+            entity.Property(e => e.ErrorDesc).HasMaxLength(50);
         });
 
         modelBuilder.Entity<TblTag>(entity =>
