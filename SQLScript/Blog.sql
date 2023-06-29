@@ -139,3 +139,13 @@ CREATE TABLE `tblResultGeneral` (
   `ErrorCode` int NOT NULL,
   `ErrorDesc` varchar(50)
 );
+
+
+SHOW variables LIKE '%log_output%'
+SHOW variables LIKE '%general_log%'
+
+SET GLOBAL log_output = 'TABLE'
+SET GLOBAL general_log = 'ON'
+SET GLOBAL general_log_file = 'mariadb.log'
+
+SELECT * FROM mysql.general_log ORDER BY event_time DESC 

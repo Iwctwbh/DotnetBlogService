@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Text.Json;
 using DotnetBlogService;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,14 +116,14 @@ app.MapPost("/AddPost", async (HttpRequest req, Stream argBody, BlogContext db) 
 
 app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db) =>
 {
-    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(0).Take(10).ToListAsync();
+    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return JsonConvert.SerializeObject(new { Erroc = "ContentLength is too long." });
 
     var readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
 
     var buffer = new byte[readSize];
 
     var read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
-    if (read > maxMessageSize) return await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(0).Take(10).ToListAsync();
+    if (read > maxMessageSize) return JsonConvert.SerializeObject(new { Erroc = "ContentLength is too long." });
     var bufferString = Encoding.Default.GetString(buffer);
 
     bufferString = System.Text.RegularExpressions.Regex.Unescape(bufferString);
@@ -140,10 +141,39 @@ app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db)
 
     // value为数字时，长度过长直接报错
     //var c = jsonBody.Value<string>("skip");
-    int.TryParse(jsonBody.Property("skip")?.Value.ToString(), out var skip);
+    int.TryParse(jsonBody.Property("skip")?.Value.ToString(), out int skip);
+    int.TryParse(jsonBody.Property("take")?.Value.ToString(), out int take);
+    string? order = jsonBody.Property("order")?.Value.ToString();
+    string? search = jsonBody.Property("search")?.Value.ToString();
     skip = Math.Max(0, skip);
+    take = jsonBody.ContainsKey("take") && take >= 0 ? take : 10;
 
-    return await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).Skip(skip).Take(10).ToListAsync();
+    List<TblPost> result;
+
+    if (order != null && order.Equals("desc", StringComparison.InvariantCultureIgnoreCase))
+    {
+        result = await db.TblPosts.AsNoTracking()
+            .Where(w => w.IsActive == 1 && (search == null || (EF.Functions.Like(w.Title, $"%{search}%") || EF.Functions.Like(w.Content, $"%{search}%"))))
+            .OrderByDescending(o => o.Id)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+    }
+
+    result = await db.TblPosts.AsNoTracking()
+        .Where(w => w.IsActive == 1 && (search == null || (EF.Functions.Like(w.Title, $"%{search}%") || EF.Functions.Like(w.Content, $"%{search}%"))))
+        .Skip(skip)
+        .Take(take)
+        .ToListAsync();
+
+    var count = await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).CountAsync();
+
+    return JsonConvert.SerializeObject(new { totalCount = count, data = result });
+});
+
+app.MapPost("/GetPostsTotalCount", async (BlogContext db) =>
+{
+    return await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).CountAsync();
 });
 
 app.Run();
