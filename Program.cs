@@ -1,9 +1,7 @@
 using DotnetBlogService.Models;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 using Newtonsoft.Json.Linq;
 using System.Text;
-using System.Text.Json;
 using DotnetBlogService;
 using Newtonsoft.Json;
 
@@ -69,67 +67,67 @@ if (app.Environment.IsDevelopment())
 
 const int maxMessageSize = 80 * 1024;
 
-app.MapPost("/AddPost", async (HttpRequest req, Stream argBody, BlogContext db) =>
-{
-    //var post = new TblPost
-    //{
-    //    Title = argTitle,
-    //    Content = argContent,
-    //    DateCreated = DateTime.Now,
-    //    DateModified = DateTime.Now,
-    //    IsActive = 1
-    //};
-    //db.TblPosts.Add(post);
-    //db.SaveChanges(); // 提交更改后才能保存到数据库。
+//app.MapPost("/AddPost", async (HttpRequest req, Stream argBody, BlogContext db) =>
+//{
+//    //var post = new TblPost
+//    //{
+//    //    Title = argTitle,
+//    //    Content = argContent,
+//    //    DateCreated = DateTime.Now,
+//    //    DateModified = DateTime.Now,
+//    //    IsActive = 1
+//    //};
+//    //db.TblPosts.Add(post);
+//    //db.SaveChanges(); // 提交更改后才能保存到数据库。
 
-    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
+//    if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
 
-    var readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
+//    int readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
 
-    var buffer = new byte[readSize];
+//    byte[] buffer = new byte[readSize];
 
-    var read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
-    if (read > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
-    var bufferString = Encoding.Default.GetString(buffer);
+//    Int32 read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
+//    if (read > maxMessageSize) return await db.TblResultGenerals.AsNoTracking().Take(10).ToListAsync();
+//    string bufferString = Encoding.Default.GetString(buffer);
 
-    bufferString = System.Text.RegularExpressions.Regex.Unescape(bufferString);
-    bufferString = bufferString.Trim('"');
+//    bufferString = System.Text.RegularExpressions.Regex.Unescape(bufferString);
+//    bufferString = bufferString.Trim('"');
 
-    var jsonBody = new JObject();
-    try
-    {
-        jsonBody = JObject.Parse(bufferString);
-    }
-    catch (Exception e)
-    {
-        // ignored
-    }
+//    JObject jsonBody = new JObject();
+//    try
+//    {
+//        jsonBody = JObject.Parse(bufferString);
+//    }
+//    catch (Exception e)
+//    {
+//        // ignored
+//    }
 
-    string? title = jsonBody.Property("title")?.Value.ToString();
-    string? content = jsonBody.Property("content")?.Value.ToString();
+//    string? title = jsonBody.Property("title")?.Value.ToString();
+//    string? content = jsonBody.Property("content")?.Value.ToString();
 
-    var result = await db.TblResultGenerals.FromSql($@"CALL sp_AddPost ({title}, {content}, 1)").ToListAsync();
-    return result;
-})
-    .WithName("AddPost")
-    .WithOpenApi();
+//    List<TblResultGeneral> result = await db.TblResultGenerals.FromSql($@"CALL sp_AddPost ({title}, {content}, 1)").ToListAsync();
+//    return result;
+//})
+//    .WithName("AddPost")
+//    .WithOpenApi();
 
 app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db) =>
 {
     if (req.ContentLength is not null && req.ContentLength > maxMessageSize) return JsonConvert.SerializeObject(new { Erroc = "ContentLength is too long." });
 
-    var readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
+    int readSize = (int?)req.ContentLength ?? maxMessageSize + 1;
 
-    var buffer = new byte[readSize];
+    byte[] buffer = new byte[readSize];
 
-    var read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
+    int read = await argBody.ReadAtLeastAsync(buffer, readSize, false);
     if (read > maxMessageSize) return JsonConvert.SerializeObject(new { Erroc = "ContentLength is too long." });
-    var bufferString = Encoding.Default.GetString(buffer);
+    string bufferString = Encoding.Default.GetString(buffer);
 
     bufferString = System.Text.RegularExpressions.Regex.Unescape(bufferString);
     bufferString = bufferString.Trim('"');
 
-    var jsonBody = new JObject();
+    JObject jsonBody = new JObject();
     try
     {
         jsonBody = JObject.Parse(bufferString);
@@ -166,7 +164,7 @@ app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db)
         .Take(take)
         .ToListAsync();
 
-    var count = await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).CountAsync();
+    int count = await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).CountAsync();
 
     return JsonConvert.SerializeObject(new { totalCount = count, data = result });
 });
