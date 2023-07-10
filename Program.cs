@@ -157,12 +157,14 @@ app.MapPost("/GetPosts", async (HttpRequest req, Stream argBody, BlogContext db)
             .Take(take)
             .ToListAsync();
     }
-
-    result = await db.TblPosts.AsNoTracking()
-        .Where(w => w.IsActive == 1 && (search == null || (EF.Functions.Like(w.Title, $"%{search}%") || EF.Functions.Like(w.Content, $"%{search}%"))))
-        .Skip(skip)
-        .Take(take)
-        .ToListAsync();
+    else
+    {
+        result = await db.TblPosts.AsNoTracking()
+            .Where(w => w.IsActive == 1 && (search == null || (EF.Functions.Like(w.Title, $"%{search}%") || EF.Functions.Like(w.Content, $"%{search}%"))))
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+    }
 
     int count = await db.TblPosts.AsNoTracking().Where(w => w.IsActive == 1).CountAsync();
 
